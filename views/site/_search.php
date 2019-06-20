@@ -20,12 +20,12 @@ use yii\jui\DatePicker;
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'date')->widget(DatePicker::class,['dateFormat' => 'yyyy-MM-dd','language'=>'ru']); ?>
-    <?= $form->field($model, 'date2')->widget(DatePicker::class,['dateFormat' => 'yyyy-MM-dd','language'=>'ru']); ?>
+    <?= $form->field($model, 'date')->label('Дата от')->widget(DatePicker::class,['dateFormat' => 'yyyy-MM-dd','language'=>'ru']); ?>
+    <?= $form->field($model, 'date2')->label('Дата до')->widget(DatePicker::class,['dateFormat' => 'yyyy-MM-dd','language'=>'ru']); ?>
 
-    <?php  echo $form->field($model, 'os') ->dropDownList(ArrayHelper::map(Log::find()->select('os')->groupBy('os')->all(),'os','os'),['prompt'=>'все значения'])  ?>
+    <?php  echo $form->field($model, 'os')->label('Операционная система')->dropDownList(ArrayHelper::map(Log::find()->select('os')->groupBy('os')->all(),'os','os'),['prompt'=>'все значения'])  ?>
 
-    <?php  echo $form->field($model, 'archi')->dropDownList(ArrayHelper::map(Log::find()->select('archi')->groupBy('archi')->all(),'archi','archi'),['prompt'=>'все значения']) ?>
+    <?php  echo $form->field($model, 'archi')->label('Ахритектура')->dropDownList(ArrayHelper::map(Log::find()->select('archi')->groupBy('archi')->all(),'archi','archi'),['prompt'=>'все значения']) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
