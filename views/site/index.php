@@ -1,53 +1,163 @@
 <?php
 
+use yii\helpers\Html;
+use yii\grid\GridView;
+use yii\grid\ListView;
+use phpnt\chartJS\ChartJs;
+use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
+
 /* @var $this yii\web\View */
+/* @var $searchModel app\models\LogSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'My Yii Application';
+$this->title = 'Access Logs';
+$this->params['breadcrumbs'][] = $this->title;
+
 ?>
-<div class="site-index">
+<h1>Logs</h1>
+<?php
+$masCnt = array_column($masDate, 'cnt', 'date');
+$masCntBrows = array_column($masDateTopBrowsers, 'cnt', 'date');
+$start = new DateTime($masDate[0]['date']);
+$interval = new DateInterval('P1D');
+$end = new DateTime(end($masDate)['date']. "+1day");
+$period = new DatePeriod($start, $interval, $end);
 
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
+// При переборе экземпляра DatePeriod в цикле будут отображены все отобранные даты
+// периода.
+$dates=[];
+$data=[];
+$databr=[];
+foreach ($period as $date) {
+    $dates[]=$date->format('d.m.y');
+    $zn=0;
+    $znbr=0;
+    //debmes($date->format('y-m-d'));
+    $zn=$masCnt[$date->format('y-m-d')] ?? 0;
+    $data[]=$zn;
+    $znbr=$masCntBrows[$date->format('y-m-d')] ?? 0;
+    if($zn!=0) $znbr=round($znbr/$zn,2)*100;
+    $databr[]=$znbr;
+}
 
-        <p class="lead">You have successfully created your Yii-powered application.</p>
+$dataWeatherOne = [
+    //'labels' => ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+    'labels' => $dates,
+    'datasets' =>[
+        [
+            'data' => $data,
+            'label' =>  "Общее число запросов",
+            'fill' => false,
+            'lineTension' => 0.1,
+            'backgroundColor' => "rgba(75,192,192,0.4)",
+            'borderColor' => "rgba(75,192,192,1)",
+            'borderCapStyle' => 'butt',
+            'borderDash' => [],
+            'borderDashOffset' => 0.0,
+            'borderJoinStyle' => 'miter',
+            'pointBorderColor' => "rgba(75,192,192,1)",
+            'pointBackgroundColor' => "#fff",
+            'pointBorderWidth' => 1,
+            'pointHoverRadius' => 5,
+            'pointHoverBackgroundColor' => "rgba(75,192,192,1)",
+            'pointHoverBorderColor' => "rgba(220,220,220,1)",
+            'pointHoverBorderWidth' => 2,
+            'pointRadius' => 1,
+            'pointHitRadius' => 10,
+            'spanGaps' => false,
+            'yAxisID'=> 'y-axis-1'
+        ],
+        [
+            'data' => $databr,
+            'label' =>  "Доля (%) для трех самых популярных браузеров: ".implode(", ", $topBrowser),
+            'fill' => false,
+            'lineTension' => 0.1,
+            'backgroundColor' => "rgba(255, 234, 0,0.4)",
+            'borderColor' => "rgba(255, 234, 0,1)",
+            'borderCapStyle' => 'butt',
+            'borderDash' => [],
+            'borderDashOffset' => 0.0,
+            'borderJoinStyle' => 'miter',
+            'pointBorderColor' => "rgba(255, 234, 0,1)",
+            'pointBackgroundColor' => "#fff",
+            'pointBorderWidth' => 1,
+            'pointHoverRadius' => 5,
+            'pointHoverBackgroundColor' => "rgba(255, 234, 0,1)",
+            'pointHoverBorderColor' => "rgba(220,220,220,1)",
+            'pointHoverBorderWidth' => 2,
+            'pointRadius' => 1,
+            'pointHitRadius' => 10,
+            'spanGaps' => false,
+            'yAxisID' => 'y-axis-2'
+        ]
+    ]
+];
+?>
+<br>
+<h3>Фильтр</h3>
+<?
+echo $this->render('_search',['model'=>$searchModel]);
 
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
-    </div>
+// вывод графиков
+?>
+<br>
+<h3>График</h3>
+<?
+echo ChartJs::widget([
+    'type'  => ChartJs::TYPE_LINE,
+    'data'  => $dataWeatherOne,
+    'options'   => [
+        'responsive'=> true,
+        'hoverMode'=> 'index',
+        'stacked' => false,
+        'title' => [
+            'display' => true,
+            'text' => 'График количество запросов'
+        ],
+        'scales' => [
+            'yAxes'=> [[
+                'type' => 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                'display' => true,
+                'position' => 'left',
+                'id' => 'y-axis-1',
+            ],
+                [
+                    'type' => 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                    'display' => true,
+                    'position' => 'right',
+                    'id' => 'y-axis-2',
+                    // grid line settings
+                    'gridLines' => [
+                        'drawOnChartArea' => false, // only want the grid lines for one axis to show up
+                    ],
+                ]]
+        ],
+    ]
+]);
 
-    <div class="body-content">
-
-        <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
-            </div>
-        </div>
-
-    </div>
+?>
+<div class="log-index">
+    <br>
+    <h3>Таблица</h3>
+    <?php
+    $dataProvider = new ArrayDataProvider([
+        'allModels' => $masDate,
+        'sort' => [
+            'attributes' => ['Дата', 'Число запросов', 'Самый популярный браузер','Самый популярный URL'],
+        ],
+        'pagination' => [
+            'pageSize' => 10,
+        ],
+    ]);
+    ?>
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'columns' => [
+            ['attribute'=>'Дата','value'=>'date'],
+            ['attribute'=>'Число запросов','value'=>'cnt'],
+            ['attribute'=>'Самый популярный браузер','value'=>'browser'],
+            ['attribute'=>'Самый популярный URL','value'=>'url'],
+        ],
+    ]); ?>
 </div>

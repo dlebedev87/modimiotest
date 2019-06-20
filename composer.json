@@ -17,7 +17,12 @@
         "php": ">=5.4.0",
         "yiisoft/yii2": "~2.0.14",
         "yiisoft/yii2-bootstrap": "~2.0.0",
-        "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0"
+        "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
+        "ua-parser/uap-php": ">=3.8.8",
+        "phpnt/yii2-chartjs": "^0.0.2",
+        "kartik-v/yii2-grid": "@dev",
+        "yiisoft/yii2-jui": "^2.0",
+        "kartik-v/yii2-field-range": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
