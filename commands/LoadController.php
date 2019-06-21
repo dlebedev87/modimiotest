@@ -34,10 +34,10 @@ class LoadController extends Controller
     ];
     public function actionIndex($message = 'hello world')
     {
-        $start = microtime(true);
-        $filelist = glob("upload/*.access.log.*");
+        $filelist = glob("upload/*access.log*");
         $parser =  UAParser\Parser::create();
         foreach ($filelist as $filename){
+            $start = microtime(true);
             echo 'Работаем с файлом: '.$filename.", его размер: ".filesize($filename)." байт \n";
             $fd = fopen($filename, 'r') or die("не удалось открыть файл");
             $create_data = array();
@@ -71,20 +71,24 @@ class LoadController extends Controller
             $prom1 = microtime(true);
             $delta = $prom1 - $start;
             echo "Сформировали массив: ".$delta . " сек.\n";
-            $this::kama_create_csv_file( $create_data, "'.$this->safedir.'/tempfile.csv","$","\n");
+            if($this::kama_create_csv_file( $create_data, "'.$this->safedir.'/tempfile.csv","$","\n")) {
+                $prom2 = microtime(true);
+                $delta = $prom2 - $prom1;
+                echo "Сохранили файл: " . $delta . " сек.\n";
 
-            $prom2 = microtime(true);
-            $delta = $prom2 - $prom1;
-            echo "Сохранили файл: ".$delta . " сек.\n";
-
-            Yii::$app->db->createCommand('
-                LOAD DATA INFILE "'.$this->safedir.'/tempfile.csv" INTO TABLE log FIELDS TERMINATED BY "$" IGNORE 1 ROWS (ip, date, url, useragent, os, archi, browser);
+                Yii::$app->db->createCommand('
+                LOAD DATA INFILE "' . $this->safedir . '/tempfile.csv" INTO TABLE log FIELDS TERMINATED BY "$" IGNORE 1 ROWS (ip, date, url, useragent, os, archi, browser);
             ')->execute();
 
-            $prom3 = microtime(true);
-            $delta = $prom3 - $prom2;
-            echo "Записали в бд: ".$delta . " сек.\n";
+                $prom3 = microtime(true);
+                $delta = $prom3 - $prom2;
+                echo "Записали в бд: " . $delta . " сек.\n";
+            }
+            else{
+                echo "Не поддерживаемый формат данных в лог файле.\n";
+            }
             unset($create_data);
+            break;
         }
         $finish = microtime(true);
         $delta = $finish - $start;
