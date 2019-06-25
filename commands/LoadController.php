@@ -45,6 +45,8 @@ class LoadController extends Controller
                 $str = fgets($fd);
                 //echo $str;
                 if(preg_match($this->re, $str, $matches, PREG_OFFSET_CAPTURE, 0)) {
+                    //print_r($matches);
+                    //die();
                     $brows="";
                     $os="";
                     $archi="";
@@ -71,7 +73,7 @@ class LoadController extends Controller
             $prom1 = microtime(true);
             $delta = $prom1 - $start;
             echo "Сформировали массив: ".$delta . " сек.\n";
-            if($this::kama_create_csv_file( $create_data, "'.$this->safedir.'/tempfile.csv","$","\n")) {
+            if($this::kama_create_csv_file( $create_data, $this->safedir."/tempfile.csv","$","\n")!==false) {
                 $prom2 = microtime(true);
                 $delta = $prom2 - $prom1;
                 echo "Сохранили файл: " . $delta . " сек.\n";
@@ -86,9 +88,9 @@ class LoadController extends Controller
             }
             else{
                 echo "Не поддерживаемый формат данных в лог файле.\n";
+                break;
             }
             unset($create_data);
-            break;
         }
         $finish = microtime(true);
         $delta = $finish - $start;
@@ -98,11 +100,11 @@ class LoadController extends Controller
     }
 
     // поиск элементов массива в строке
-    private function strpos_array($haystack, $needles) {
+    static private function strpos_array($haystack, $needles) {
         if ( is_array($needles) ) {
             foreach ($needles as $str) {
                 if ( is_array($str) ) {
-                    $pos = strpos_array($haystack, $str);
+                    $pos = static::strpos_array($haystack, $str);
                 } else {
                     $pos = strpos($haystack, $str);
                 }
@@ -120,7 +122,7 @@ class LoadController extends Controller
     ## @param string $file         Путь до файла 'path/to/test.csv'. Если не указать, то просто вернет результат.
     ## @return string/false        CSV строку или false, если не удалось создать файл.
     ## ver 2
-    private function kama_create_csv_file( $create_data, $file = null, $col_delimiter = ';', $row_delimiter = "\r\n" ){
+    static private function kama_create_csv_file( $create_data, $file = null, $col_delimiter = ';', $row_delimiter = "\r\n" ){
 
         if( ! is_array($create_data) )
             return false;
@@ -167,11 +169,7 @@ class LoadController extends Controller
 
             // создаем csv файл и записываем в него строку
             $done = file_put_contents( $file, $CSV_str );
-
-            return $done ? $CSV_str : false;
+            return $done ?? false;
         }
-
-        return $CSV_str;
-
     }
 }

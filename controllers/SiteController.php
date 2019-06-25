@@ -88,7 +88,7 @@ class SiteController extends Controller
             ->asArray()
             ->all();
 
-        return $this->render('index',compact(masDateTopBrowsers,masDate,topBrowser,searchModel,dataProvider));
+        return $this->render('index',compact('masDateTopBrowsers','masDate','topBrowser','searchModel','dataProvider'));
 
     }
 
